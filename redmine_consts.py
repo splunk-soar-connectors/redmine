@@ -1,6 +1,6 @@
 # File: redmine_consts.py
 #
-# Copyright (c) 2021 Splunk Inc.
+# Copyright (c) 2021-2026 Splunk Inc.
 #
 # Licensed under Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -41,28 +41,46 @@ PARSE_ERR_MSG = "Unable to parse the error message. Please check the asset confi
 
 # Constants relating to 'validate_integer'
 REDMINE_VALID_INT_MSG = "Please provide a valid integer value in the {param}"
-REDMINE_NON_NEG_NON_ZERO_INT_MSG = "Please provide a valid non-zero positive integer value in {param}"
-REDMINE_NON_NEG_INT_MSG = "Please provide a valid non-negative integer value in the {param}"
+REDMINE_NON_NEG_NON_ZERO_INT_MSG = (
+    "Please provide a valid non-zero positive integer value in {param}"
+)
+REDMINE_NON_NEG_INT_MSG = (
+    "Please provide a valid non-negative integer value in the {param}"
+)
 REDMINE_START_INDEX_KEY = "'start_index' action parameter"
 REDMINE_MAX_RESULTS_KEY = "'max_results' action parameter"
 REDMINE_CONTAINER_COUNT_KEY = "'Maximum containers' configuration parameter"
 
 # Constants relating to error messages
-REDMINE_ERR_EMPTY_RESPONSE = "Status Code {code}. Empty response and no information in the header."
+REDMINE_ERR_EMPTY_RESPONSE = (
+    "Status Code {code}. Empty response and no information in the header."
+)
 REDMINE_UNABLE_TO_PARSE_ERR_DETAILS = "Cannot parse error details"
 REDMINE_ERR_UNABLE_TO_PARSE_JSON_RESPONSE = "Unable to parse response as JSON. {error}"
 REDMINE_ERR_CONNECTING_TO_SERVER = "Error connecting to server. Details: {error}"
 REDMINE_ERR_INVALID_URL = "Error connecting to server. Invalid URL"
-REDMINE_ERR_CONNECTION_REFUSED = "Error connecting to server. Connection Refused from the server."
-REDMINE_ERR_INVALID_SCHEMA = "Error connecting to server. No connection adapters were found."
+REDMINE_ERR_CONNECTION_REFUSED = (
+    "Error connecting to server. Connection Refused from the server."
+)
+REDMINE_ERR_INVALID_SCHEMA = (
+    "Error connecting to server. No connection adapters were found."
+)
 REDMINE_ERR_TEST_CONN_FAILED = "Test Connectivity Failed. Could not connect to server."
 REDMINE_SUCC_TEST_CONN_PASSED = "Test Connectivity Passed"
-REDMINE_ERR_INVALID_CUSTOM_FIELDS = "Please provide a valid value in 'custom fields' config parameter"
+REDMINE_ERR_INVALID_CUSTOM_FIELDS = (
+    "Please provide a valid value in 'custom fields' config parameter"
+)
 REDMINE_ERR_PARSING_CUSTOM_FIELDS = "Could not parse custom fields: {error}"
 REDMINE_ERR_RETRIEVE_DEFINITIONS = "Could not retrieve definitions on '{endpoint}'"
-REDMINE_ERR_MAPPING_NOT_FOUND = "Could not find mapping for provided value on '{endpoint}'"
-REDMINE_ERR_PROCESSING_ENUMERATION = "Error occurred while processing the response of the Redmine enumeration"
-REDMINE_ERR_PROCESSING_UPLOAD_DICT = "Error occurred while processing the upload dictionary"
+REDMINE_ERR_MAPPING_NOT_FOUND = (
+    "Could not find mapping for provided value on '{endpoint}'"
+)
+REDMINE_ERR_PROCESSING_ENUMERATION = (
+    "Error occurred while processing the response of the Redmine enumeration"
+)
+REDMINE_ERR_PROCESSING_UPLOAD_DICT = (
+    "Error occurred while processing the upload dictionary"
+)
 REDMINE_ERR_CREATE_TICKET = "Could not create ticket"
 REDMINE_ERR_PARSE_UPDATE_FIELDS = "Could not parse update_fields into JSON: {error}"
 REDMINE_ERR_INVALID_VAULT_ID = "Invalid Vault ID: '{vault_id}'"

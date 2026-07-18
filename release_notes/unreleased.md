@@ -1,3 +1,3 @@
 **Unreleased**
 
-* Chore: adopt current connector validation and release workflows.
+* Enabled Redmine server certificate verification by default.

@@ -969,7 +969,7 @@ class RedmineConnector(BaseConnector):
         self._username = config.get("username")
         self._password = config.get("password")
         self._project_id = config["project_id"]
-        self._verify_server_cert = config.get("verify_server_cert", False)
+        self._verify_server_cert = config.get("verify_server_cert", True)
         custom_fields = config.get("custom_fields")
 
         if custom_fields:

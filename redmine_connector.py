@@ -16,6 +16,7 @@ import phantom.rules as Rules
 from redmine_consts import *
 import requests
 import json
+from urllib.parse import quote
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import dateutil.parser
@@ -428,11 +429,16 @@ class RedmineConnector(BaseConnector):
 
         return ret_val, response["issues"]
 
+    @staticmethod
+    def _issue_endpoint(issue_id):
+        """Build an issue endpoint without allowing a caller to alter its path."""
+        return "/issues/{}.json".format(quote(str(issue_id), safe=""))
+
     def _retrieve_ticket(self, action_result, id):
         """Retrieves an individual ticket from Redmine"""
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json", action_result, headers=None
+            self._issue_endpoint(id), action_result, headers=None
         )
         if phantom.is_fail(ret_val):
             return action_result.set_status(
@@ -720,7 +726,7 @@ class RedmineConnector(BaseConnector):
             payload["issue"]["uploads"] = [upload]
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             params=None,
             method="put",
@@ -756,7 +762,7 @@ class RedmineConnector(BaseConnector):
         payload = {"issue": {"notes": comment}}
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="put",
             params=None,
@@ -859,7 +865,7 @@ class RedmineConnector(BaseConnector):
         id = param["id"]
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="delete",
             params=None,
@@ -901,7 +907,7 @@ class RedmineConnector(BaseConnector):
         payload = {"issue": {"status_id": status_id, "notes": comment}}
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="put",
             params=None,

@@ -10,7 +10,7 @@
     "python_version": "3",
     "product_version_regex": ".*",
     "publisher": "Splunk Community",
-    "license": "Copyright (c) 2021 Splunk Inc.",
+    "license": "Copyright (c) 2021-2026 Splunk Inc.",
     "app_version": "1.0.0",
     "utctime_updated": "2021-02-25T10:35:44.521521Z",
     "package_name": "phantom_redmine",
@@ -27,7 +27,7 @@
         "verify_server_cert": {
             "description": "Verify Server Certificate",
             "data_type": "boolean",
-            "default": false,
+            "default": true,
             "order": 1
         },
         "username": {

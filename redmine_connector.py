@@ -1,6 +1,6 @@
 # File: redmine_connector.py
 #
-# Copyright (c) 2021 Splunk Inc.
+# Copyright (c) 2021-2026 Splunk Inc.
 #
 # Licensed under Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0.txt)
 
@@ -16,6 +16,7 @@ import phantom.rules as Rules
 from redmine_consts import *
 import requests
 import json
+from urllib.parse import quote
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import dateutil.parser
@@ -46,7 +47,7 @@ class RedmineConnector(BaseConnector):
         self._verify_server_cert = None
 
     def _get_error_message_from_exception(self, e):
-        """ This method is used to get appropriate error message from the exception.
+        """This method is used to get appropriate error message from the exception.
         :param e: Exception object
         :return: error message
         """
@@ -62,7 +63,7 @@ class RedmineConnector(BaseConnector):
             else:
                 error_code = ERR_CODE_MSG
                 error_msg = ERR_MSG_UNAVAILABLE
-        except:
+        except Exception:
             error_code = ERR_CODE_MSG
             error_msg = ERR_MSG_UNAVAILABLE
 
@@ -70,15 +71,17 @@ class RedmineConnector(BaseConnector):
             if error_code in ERR_CODE_MSG:
                 error_text = "Error Message: {0}".format(error_msg)
             else:
-                error_text = "Error Code: {0}. Error Message: {1}".format(error_code, error_msg)
-        except:
+                error_text = "Error Code: {0}. Error Message: {1}".format(
+                    error_code, error_msg
+                )
+        except Exception:
             self.debug_print(PARSE_ERR_MSG)
             error_text = PARSE_ERR_MSG
 
         return error_text
 
     def _validate_integer(self, action_result, parameter, key, allow_zero=False):
-        """ This method is to check if the provided input parameter value
+        """This method is to check if the provided input parameter value
         is a non-zero positive integer and returns the integer value of the parameter itself.
         :param action_result: Action result or BaseConnector object
         :param parameter: input parameter
@@ -90,16 +93,25 @@ class RedmineConnector(BaseConnector):
         if parameter is not None:
             try:
                 if not float(parameter).is_integer():
-                    return action_result.set_status(phantom.APP_ERROR, REDMINE_VALID_INT_MSG.format(param=key)), None
+                    return action_result.set_status(
+                        phantom.APP_ERROR, REDMINE_VALID_INT_MSG.format(param=key)
+                    ), None
 
                 parameter = int(parameter)
-            except:
-                return action_result.set_status(phantom.APP_ERROR, REDMINE_VALID_INT_MSG.format(param=key)), None
+            except Exception:
+                return action_result.set_status(
+                    phantom.APP_ERROR, REDMINE_VALID_INT_MSG.format(param=key)
+                ), None
 
             if parameter < 0:
-                return action_result.set_status(phantom.APP_ERROR, REDMINE_NON_NEG_INT_MSG.format(param=key)), None
+                return action_result.set_status(
+                    phantom.APP_ERROR, REDMINE_NON_NEG_INT_MSG.format(param=key)
+                ), None
             if not allow_zero and parameter == 0:
-                return action_result.set_status(phantom.APP_ERROR, REDMINE_NON_NEG_NON_ZERO_INT_MSG.format(param=key)), None
+                return action_result.set_status(
+                    phantom.APP_ERROR,
+                    REDMINE_NON_NEG_NON_ZERO_INT_MSG.format(param=key),
+                ), None
 
         return phantom.APP_SUCCESS, parameter
 
@@ -111,7 +123,8 @@ class RedmineConnector(BaseConnector):
 
         return RetVal(
             action_result.set_status(
-                phantom.APP_ERROR, REDMINE_ERR_EMPTY_RESPONSE.format(code=response.status_code)
+                phantom.APP_ERROR,
+                REDMINE_ERR_EMPTY_RESPONSE.format(code=response.status_code),
             ),
             None,
         )
@@ -129,7 +142,7 @@ class RedmineConnector(BaseConnector):
             split_lines = error_text.split("\n")
             split_lines = [x.strip() for x in split_lines if x.strip()]
             error_text = "\n".join(split_lines)
-        except:
+        except Exception:
             error_text = REDMINE_UNABLE_TO_PARSE_ERR_DETAILS
 
         message = "Status Code: {0}. Data from server:\n{1}\n".format(
@@ -150,7 +163,9 @@ class RedmineConnector(BaseConnector):
                 return RetVal(
                     action_result.set_status(
                         phantom.APP_ERROR,
-                        REDMINE_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(error=error_msg),
+                        REDMINE_ERR_UNABLE_TO_PARSE_JSON_RESPONSE.format(
+                            error=error_msg
+                        ),
                     ),
                     None,
                 )
@@ -222,13 +237,24 @@ class RedmineConnector(BaseConnector):
             )
         except requests.exceptions.InvalidURL as e:
             self.debug_print(self._get_error_message_from_exception(e))
-            return RetVal(action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_URL), resp_json)
+            return RetVal(
+                action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_URL),
+                resp_json,
+            )
         except requests.exceptions.ConnectionError as e:
             self.debug_print(self._get_error_message_from_exception(e))
-            return RetVal(action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_CONNECTION_REFUSED), resp_json)
+            return RetVal(
+                action_result.set_status(
+                    phantom.APP_ERROR, REDMINE_ERR_CONNECTION_REFUSED
+                ),
+                resp_json,
+            )
         except requests.exceptions.InvalidSchema as e:
             self.debug_print(self._get_error_message_from_exception(e))
-            return RetVal(action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_SCHEMA), resp_json)
+            return RetVal(
+                action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_SCHEMA),
+                resp_json,
+            )
         except Exception as e:
             error_msg = self._get_error_message_from_exception(e)
             self.debug_print(self._get_error_message_from_exception(e))
@@ -399,18 +425,20 @@ class RedmineConnector(BaseConnector):
                 message = f"{REDMINE_ERR_RETRIEVE_TICKETS}. {action_result_message}"
             else:
                 message = REDMINE_ERR_RETRIEVE_TICKETS
-            return RetVal(
-                    action_result.set_status(phantom.APP_ERROR, message),
-                    None
-                )
+            return RetVal(action_result.set_status(phantom.APP_ERROR, message), None)
 
         return ret_val, response["issues"]
+
+    @staticmethod
+    def _issue_endpoint(issue_id):
+        """Build an issue endpoint without allowing a caller to alter its path."""
+        return "/issues/{}.json".format(quote(str(issue_id), safe=""))
 
     def _retrieve_ticket(self, action_result, id):
         """Retrieves an individual ticket from Redmine"""
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json", action_result, headers=None
+            self._issue_endpoint(id), action_result, headers=None
         )
         if phantom.is_fail(ret_val):
             return action_result.set_status(
@@ -427,7 +455,8 @@ class RedmineConnector(BaseConnector):
 
         if phantom.is_fail(ret_val):
             return action_result.set_status(
-                phantom.APP_ERROR, REDMINE_ERR_RETRIEVE_DEFINITIONS.format(endpoint=endpoint)
+                phantom.APP_ERROR,
+                REDMINE_ERR_RETRIEVE_DEFINITIONS.format(endpoint=endpoint),
             )
 
         try:
@@ -462,9 +491,14 @@ class RedmineConnector(BaseConnector):
                 )
             )
             if not vault_info:
-                return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_GETTING_VAULT_INFO)
+                return action_result.set_status(
+                    phantom.APP_ERROR, REDMINE_ERR_GETTING_VAULT_INFO
+                )
         except requests.exceptions.HTTPError:
-            return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_VAULT_ID.format(vault_id=vault_id))
+            return action_result.set_status(
+                phantom.APP_ERROR,
+                REDMINE_ERR_INVALID_VAULT_ID.format(vault_id=vault_id),
+            )
         except Exception as e:
             error_msg = self._get_error_message_from_exception(e)
             return action_result.set_status(
@@ -483,7 +517,9 @@ class RedmineConnector(BaseConnector):
         try:
             file_path = file_info["path"]
         except Exception:
-            return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_GETTING_FILE_PATH)
+            return action_result.set_status(
+                phantom.APP_ERROR, REDMINE_ERR_GETTING_FILE_PATH
+            )
 
         with open(file_path, "rb") as f:
             file_contents = f.read()
@@ -551,7 +587,9 @@ class RedmineConnector(BaseConnector):
 
             # Integer validation for 'maximum containers' configuration parameter
             max_tickets = param[phantom.APP_JSON_CONTAINER_COUNT]
-            ret_val, max_tickets = self._validate_integer(action_result, max_tickets, REDMINE_CONTAINER_COUNT_KEY)
+            ret_val, max_tickets = self._validate_integer(
+                action_result, max_tickets, REDMINE_CONTAINER_COUNT_KEY
+            )
             if phantom.is_fail(ret_val):
                 return action_result.get_status()
             last_run = backfill
@@ -612,7 +650,8 @@ class RedmineConnector(BaseConnector):
         except Exception as e:
             error_msg = self._get_error_message_from_exception(e)
             return action_result.set_status(
-                phantom.APP_ERROR, REDMINE_ERR_PARSING_CUSTOM_FIELDS.format(error=error_msg)
+                phantom.APP_ERROR,
+                REDMINE_ERR_PARSING_CUSTOM_FIELDS.format(error=error_msg),
             )
 
         payload["issue"]["custom_fields"] = parsed_custom_fields
@@ -671,7 +710,8 @@ class RedmineConnector(BaseConnector):
         except Exception as e:
             error_msg = self._get_error_message_from_exception(e)
             return action_result.set_status(
-                phantom.APP_ERROR, REDMINE_ERR_PARSE_UPDATE_FIELDS.format(error=error_msg)
+                phantom.APP_ERROR,
+                REDMINE_ERR_PARSE_UPDATE_FIELDS.format(error=error_msg),
             )
 
         payload = {"issue": {}}
@@ -686,7 +726,7 @@ class RedmineConnector(BaseConnector):
             payload["issue"]["uploads"] = [upload]
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             params=None,
             method="put",
@@ -695,7 +735,9 @@ class RedmineConnector(BaseConnector):
         )
 
         if phantom.is_fail(ret_val):
-            return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_UPDATE_TICKET)
+            return action_result.set_status(
+                phantom.APP_ERROR, REDMINE_ERR_UPDATE_TICKET
+            )
 
         ret_val, response = self._retrieve_ticket(action_result, id)
         if phantom.is_fail(ret_val):
@@ -720,7 +762,7 @@ class RedmineConnector(BaseConnector):
         payload = {"issue": {"notes": comment}}
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="put",
             params=None,
@@ -729,7 +771,9 @@ class RedmineConnector(BaseConnector):
         )
 
         if phantom.is_fail(ret_val):
-            return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_ADD_COMMENT.format(id=id))
+            return action_result.set_status(
+                phantom.APP_ERROR, REDMINE_ERR_ADD_COMMENT.format(id=id)
+            )
 
         ret_val, response = self._retrieve_ticket(action_result, id)
         if phantom.is_fail(ret_val):
@@ -752,20 +796,24 @@ class RedmineConnector(BaseConnector):
 
         # Integer validation for 'start_index' action parameter
         start_index = param.get("start_index", 0)
-        ret_val, start_index = self._validate_integer(action_result, start_index, REDMINE_START_INDEX_KEY, allow_zero=True)
+        ret_val, start_index = self._validate_integer(
+            action_result, start_index, REDMINE_START_INDEX_KEY, allow_zero=True
+        )
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         # Integer validation for 'max_results' action parameter
         max_results = param.get("max_results", 100)
-        ret_val, max_results = self._validate_integer(action_result, max_results, REDMINE_MAX_RESULTS_KEY, allow_zero=True)
+        ret_val, max_results = self._validate_integer(
+            action_result, max_results, REDMINE_MAX_RESULTS_KEY, allow_zero=True
+        )
         if phantom.is_fail(ret_val):
             return action_result.get_status()
 
         params = {
             "offset": start_index,
             "limit": max_results,
-            "project_id": self._project_id
+            "project_id": self._project_id,
         }
 
         ret_val, response = self._make_rest_call(
@@ -773,18 +821,15 @@ class RedmineConnector(BaseConnector):
         )
 
         if phantom.is_fail(ret_val) or "issues" not in response:
-            return action_result.set_status(
-                phantom.APP_ERROR,
-                REDMINE_ERR_LIST_TICKETS
-            )
+            return action_result.set_status(phantom.APP_ERROR, REDMINE_ERR_LIST_TICKETS)
 
         # Action Result
         action_result.add_data(response)
 
         summary = action_result.update_summary({})
-        summary['num_tickets'] = len(response['issues'])
-        summary['total_tickets'] = response.get('total_count', 0)
-        summary['offset'] = response.get('offset', 0)
+        summary["num_tickets"] = len(response["issues"])
+        summary["total_tickets"] = response.get("total_count", 0)
+        summary["offset"] = response.get("offset", 0)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -820,7 +865,7 @@ class RedmineConnector(BaseConnector):
         id = param["id"]
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="delete",
             params=None,
@@ -862,7 +907,7 @@ class RedmineConnector(BaseConnector):
         payload = {"issue": {"status_id": status_id, "notes": comment}}
 
         ret_val, response = self._make_rest_call(
-            f"/issues/{id}.json",
+            self._issue_endpoint(id),
             action_result,
             method="put",
             params=None,
@@ -926,17 +971,21 @@ class RedmineConnector(BaseConnector):
         # get the asset config
         config = self.get_config()
 
-        self._base_url = config["base_url"].strip('/')
+        self._base_url = config["base_url"].strip("/")
         self._username = config.get("username")
         self._password = config.get("password")
         self._project_id = config["project_id"]
-        self._verify_server_cert = config.get('verify_server_cert', False)
+        self._verify_server_cert = config.get("verify_server_cert", True)
         custom_fields = config.get("custom_fields")
 
         if custom_fields:
-            self._custom_fields_list = [field.strip() for field in custom_fields.split(',') if field.strip()]
+            self._custom_fields_list = [
+                field.strip() for field in custom_fields.split(",") if field.strip()
+            ]
             if not self._custom_fields_list:
-                return self.set_status(phantom.APP_ERROR, REDMINE_ERR_INVALID_CUSTOM_FIELDS)
+                return self.set_status(
+                    phantom.APP_ERROR, REDMINE_ERR_INVALID_CUSTOM_FIELDS
+                )
 
         return phantom.APP_SUCCESS
 
@@ -966,7 +1015,6 @@ def main():
     password = args.password
 
     if username is not None and password is None:
-
         # User specified a username but not a password, so ask
         import getpass
 

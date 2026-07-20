@@ -12,7 +12,7 @@
     "publisher": "Splunk Community",
     "license": "Copyright (c) 2021-2026 Splunk Inc.",
     "app_version": "1.0.0",
-    "utctime_updated": "2021-02-25T10:35:44.521521Z",
+    "utctime_updated": "2026-07-20T17:53:23.825073Z",
     "package_name": "phantom_redmine",
     "main_module": "redmine_connector.py",
     "min_phantom_version": "4.9.39220",

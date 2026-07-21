@@ -1,7 +1,7 @@
 # Redmine
 
 Publisher: Splunk Community <br>
-Connector Version: 1.0.0 <br>
+Connector Version: 1.0.1 <br>
 Product Vendor: Redmine <br>
 Product Name: Redmine <br>
 Minimum Product Version: 4.9.39220
